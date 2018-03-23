@@ -1,0 +1,3 @@
+TYPE(OP)
+TYPE(NUM)
+TYPE(VAR)

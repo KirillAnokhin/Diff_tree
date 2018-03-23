@@ -1,0 +1,7 @@
+digraph dump {
+node [shape = record];
+27525360 [shape = record, label = "{ptr: 27525360|type: OP|value: *|left: 27525328|right: 27525296}"];27525360 -> 27525328
+27525328 [shape = record, label = "{ptr: 27525328|type: NUM|value: 2.000000|left: 0|right: 0}"];27525360 -> 27525296
+27525296 [shape = record, label = "{ptr: 27525296|type: OP|value: ^|left: 27525264|right: 27525232}"];27525296 -> 27525264
+27525264 [shape = record, label = "{ptr: 27525264|type: VAR|value: x|left: 0|right: 0}"];27525296 -> 27525232
+27525232 [shape = record, label = "{ptr: 27525232|type: NUM|value: 1.000000|left: 0|right: 0}"];}
