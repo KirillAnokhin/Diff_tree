@@ -68,15 +68,27 @@ int main()
     node_t* d = diff(tree);
     Tree_Print(d);
     */
+    //CREATE TREE shx
     /*
-    node_t* tree_l = node_create(TYPE_VAR, var_x, NULL, NULL);
-    node_t* tree = node_create(TYPE_OP, OP_SIN, tree_l, NULL);
-    Tree_Print(tree);
+    node_t* tree_l = node_create(TYPE_VAR, 'x', NULL, NULL);
+    node_t* tree = node_create(TYPE_OP, OP_SH, tree_l, NULL);
+    node_t* d = diff(tree);
+    Tree_Print(d);
     */
     //CREATE TREE x^2
-    node_t* tree_l = node_create(TYPE_VAR, var_x, NULL, NULL);
-    node_t* tree_r = node_create(TYPE_NUM, 2, NULL, NULL);
+    /*
+    node_t* tree_l = node_create(TYPE_VAR, 'x', NULL, NULL);
+    node_t* tree_r = node_create(TYPE_VAR, 'x', NULL, NULL);
+
     node_t* tree = node_create(TYPE_OP, OP_POW, tree_l, tree_r);
+
+    node_t* d = diff(tree);
+
+    Tree_Print(d);
+    */
+    //CREATE TREE tg(x)
+    node_t* tree_l = node_create(TYPE_VAR, 'x', NULL, NULL);
+    node_t* tree = node_create(TYPE_OP, OP_TAN, tree_l, NULL);
     node_t* d = diff(tree);
     Tree_Print(d);
     return 0;

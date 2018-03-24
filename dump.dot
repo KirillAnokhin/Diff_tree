@@ -1,7 +1,9 @@
 digraph dump {
 node [shape = record];
-27525360 [shape = record, label = "{ptr: 27525360|type: OP|value: *|left: 27525328|right: 27525296}"];27525360 -> 27525328
-27525328 [shape = record, label = "{ptr: 27525328|type: NUM|value: 2.000000|left: 0|right: 0}"];27525360 -> 27525296
-27525296 [shape = record, label = "{ptr: 27525296|type: OP|value: ^|left: 27525264|right: 27525232}"];27525296 -> 27525264
-27525264 [shape = record, label = "{ptr: 27525264|type: VAR|value: x|left: 0|right: 0}"];27525296 -> 27525232
-27525232 [shape = record, label = "{ptr: 27525232|type: NUM|value: 1.000000|left: 0|right: 0}"];}
+25030992 [shape = record, label = "{ptr: 25030992|type: OP|value: /|left: 25030960|right: 25030928}"];25030992 -> 25030960
+25030960 [shape = record, label = "{ptr: 25030960|type: NUM|value: 1.000000|left: 0|right: 0}"];25030992 -> 25030928
+25030928 [shape = record, label = "{ptr: 25030928|type: OP|value: *|left: 25030864|right: 25030768}"];25030928 -> 25030864
+25030864 [shape = record, label = "{ptr: 25030864|type: OP|value: cos|left: 25030896|right: 0}"];25030864 -> 25030896
+25030896 [shape = record, label = "{ptr: 25030896|type: VAR|value: x|left: 0|right: 0}"];25030928 -> 25030768
+25030768 [shape = record, label = "{ptr: 25030768|type: OP|value: cos|left: 25030800|right: 0}"];25030768 -> 25030800
+25030800 [shape = record, label = "{ptr: 25030800|type: VAR|value: x|left: 0|right: 0}"];}

@@ -22,5 +22,6 @@ node_t* node_copy(node_t* n);
 node_t* diff(const node_t* n);
 node_t* mult_diff(node_t* n);
 node_t* div_diff(node_t* n);
+node_t* pow_diff(node_t* n);
 
 #endif

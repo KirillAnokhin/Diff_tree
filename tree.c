@@ -56,10 +56,39 @@ node_t* diff(const node_t* n)
                     return _MULT(node_create(TYPE_NUM, -1, NULL, NULL), _MULT(diff(n->left), _SIN(n -> left)));
                 case OP_POW:
                 {
-                    if(n -> left -> type == TYPE_VAR && n -> right -> type == TYPE_NUM)
-                        return _MULT(node_create(TYPE_NUM, n -> right -> value, NULL, NULL), _POW(node_create(TYPE_VAR, var_x, NULL, NULL),
-                        node_create(TYPE_NUM, n -> right -> type - 1, NULL, NULL)));
+                    if(n -> right -> type == TYPE_NUM) // ((f)^a)' = a * (f)^(a - 1) * f' = a * (f)^b * f'
+                    {
+                        node_t* a = node_create(TYPE_NUM, n -> right -> value, NULL, NULL);
+                        node_t* b = node_create(TYPE_NUM, n -> right -> value - 1, NULL, NULL);
+                        node_t* f_ = diff(n -> left);
+                        node_t* f = node_copy(n -> left);
+                        return _MULT(_MULT(a, _POW(f, b)), f_);
+                    }
+                    else if(n -> left -> type == TYPE_NUM) // (a^(f))' = ln(a) * a^(f) * f'
+                    {
+                        node_t* a = node_create(TYPE_NUM, n -> left -> value, NULL, NULL);
+                        node_t* ln_a = _LN(a);
+                        node_t* f_ = diff(n -> right);
+                        node_t* f = node_copy(n -> right);
+                        return _MULT(_MULT(ln_a, _POW(node_copy(a), f)), f_);
+                    }
+                    else // (f^(g))' = (e^(g*ln(f)))' = e^(g * ln(f)) * (g * ln(f))'
+                    {
+                        node_t* f = node_copy(n -> left);
+                        node_t* g = node_copy(n -> right);
+                        node_t* e = node_create(TYPE_VAR, 'e', NULL, NULL);
+                        node_t* ln_f = _LN(node_copy(f));
+                        return _MULT(_POW(e, _MULT(g, ln_f)), mult_diff(_MULT(node_copy(g), node_copy(ln_f))));
+                    }
                 }
+                case OP_LN:
+                    return _DIV(diff(n -> left), node_copy(n -> left));
+                case OP_SH:
+                    return _MULT(diff(n -> left), _CH(n -> left));
+                case OP_CH:
+                    return _MULT(diff(n -> left), _SH(n -> left));
+                case OP_TAN:
+                    return _DIV(diff(n -> left), _MULT(node_copy(_COS(n -> left)), node_copy(_COS(n -> left))));
             }
 
     }
