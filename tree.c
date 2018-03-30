@@ -37,23 +37,37 @@ node_t* diff(const node_t* n)
     {
         case TYPE_NUM:
             return _ZERO;
+
         case TYPE_VAR:
             return _ONE;
+
         case TYPE_OP:
             switch((int)(n -> value))
             {
                 case OP_PLUS:
                     return _PLUS(diff(n -> left), diff(n -> right));
+
                 case OP_MINUS:
                     return _MINUS(diff(n -> left), diff(n -> right));
+
                 case OP_MULT:
                     return mult_diff(n);
+
                 case OP_DIV:
                     return div_diff(n);
+
                 case OP_SIN:
-                    return _MULT(diff(n -> left), _COS(n -> left));
+                    if(n -> left -> type == TYPE_NUM || n -> left -> type == TYPE_VAR && n -> left -> value != 'x')
+                        return _ZERO;
+                    else
+                        return _MULT(diff(n -> left), _COS(n -> left));
+
                 case OP_COS:
-                    return _MULT(node_create(TYPE_NUM, -1, NULL, NULL), _MULT(diff(n->left), _SIN(n -> left)));
+                    if(n -> left -> type == TYPE_NUM || n -> left -> type == TYPE_VAR && n -> left -> value != 'x')
+                        return _ZERO;
+                    else
+                        return _MULT(node_create(TYPE_NUM, -1, NULL, NULL), _MULT(diff(n->left), _SIN(n -> left)));
+
                 case OP_POW:
                 {
                     if(n -> right -> type == TYPE_NUM) // ((f)^a)' = a * (f)^(a - 1) * f' = a * (f)^b * f'
@@ -81,14 +95,30 @@ node_t* diff(const node_t* n)
                         return _MULT(_POW(e, _MULT(g, ln_f)), mult_diff(_MULT(node_copy(g), node_copy(ln_f))));
                     }
                 }
+
                 case OP_LN:
-                    return _DIV(diff(n -> left), node_copy(n -> left));
+                    if(n -> left -> type == TYPE_NUM || n -> left -> type == TYPE_VAR && n -> left -> value != 'x')
+                        return _ZERO;
+                    else
+                        return _DIV(diff(n -> left), node_copy(n -> left));
+
                 case OP_SH:
-                    return _MULT(diff(n -> left), _CH(n -> left));
+                    if(n -> left -> type == TYPE_NUM || n -> left -> type == TYPE_VAR && n -> left -> value != 'x')
+                        return _ZERO;
+                    else
+                        return _MULT(diff(n -> left), _CH(n -> left));
+
                 case OP_CH:
-                    return _MULT(diff(n -> left), _SH(n -> left));
+                    if(n -> left -> type == TYPE_NUM || n -> left -> type == TYPE_VAR && n -> left -> value != 'x')
+                        return _ZERO;
+                    else
+                        return _MULT(diff(n -> left), _SH(n -> left));
+
                 case OP_TAN:
-                    return _DIV(diff(n -> left), _MULT(node_copy(_COS(n -> left)), node_copy(_COS(n -> left))));
+                    if(n -> left -> type == TYPE_NUM || n -> left -> type == TYPE_VAR && n -> left -> value != 'x')
+                        return _ZERO;
+                    else
+                        return _DIV(diff(n -> left), _MULT(node_copy(_COS(n -> left)), node_copy(_COS(n -> left))));
             }
 
     }
@@ -96,7 +126,7 @@ node_t* diff(const node_t* n)
     return NULL;
 }
 
-node_t* mult_diff(node_t* n)
+node_t* mult_diff(const node_t* n)
 {
         node_t* u_ = diff(n -> left);
         node_t* v  = node_copy(n -> right);
@@ -105,7 +135,7 @@ node_t* mult_diff(node_t* n)
         return _PLUS(_MULT(u_, v), _MULT(u, v_));
 }
 
-node_t* div_diff(node_t* n)
+node_t* div_diff(const node_t* n)
 {
     node_t* u_ = diff(n -> left);
     node_t* v  = node_copy(n -> right);
@@ -116,6 +146,186 @@ node_t* div_diff(node_t* n)
     node_t* numerator   = _MINUS(_MULT(u_, v), _MULT(u, v_));
     node_t* denominator = _MULT(znam1, znam2);
     return _DIV(numerator, denominator);
+}
+
+int tree_delete(node_t* n)
+{
+    if(n -> left != NULL)
+        tree_delete(n -> left);
+    if(n -> right != NULL)
+        tree_delete(n -> right);
+    free(n);
+    return 0;
+}
+
+int tree_opt_rec(node_t* n, int* k)
+{
+    if(n -> type == TYPE_OP)
+    {
+        switch((int)n -> value)
+        {
+            case OP_PLUS:
+                if(n -> left -> type == TYPE_NUM && n -> right -> type == TYPE_NUM)
+                {
+                    n -> type = TYPE_NUM;
+                    n -> value = (n -> left -> value) + (n -> right -> value);
+                    tree_delete(n -> left);
+                    tree_delete(n -> right);
+                    n -> left = NULL;
+                    n -> right = NULL;
+                    (*k)++;
+                }
+                else if(n -> left -> type == TYPE_NUM && n -> left -> value == 0)
+                {
+                    n -> type = n -> right -> type;
+                    n -> value = n -> right -> value;
+                    node_t * tmp = n -> right;
+                    n -> right = tmp -> right;
+                    n -> left = tmp -> left;
+                    free(tmp);
+                    (*k)++;
+                }
+                else if(n -> right -> type == TYPE_NUM && n -> right -> value == 0)
+                {
+                    n -> type = n -> left -> type;
+                    n -> value = n -> left -> value;
+                    node_t * tmp = n -> left;
+                    n -> right = tmp -> right;
+                    n -> left = tmp -> left;
+                    free(tmp);
+                    (*k)++;
+                }
+
+                break;
+            case OP_MULT:
+                if((n -> left -> type == TYPE_NUM) && (n -> right -> type == TYPE_NUM))
+                {
+                    n -> type = TYPE_NUM;
+                    n -> value = (n -> left -> value) * (n -> right -> value);
+                    tree_delete(n -> left);
+                    tree_delete(n -> right);
+                    n -> left = NULL;
+                    n -> right = NULL;
+                    (*k)++;
+                }
+                else if(n -> right -> type == TYPE_NUM && n -> right -> value == 0)
+                {
+                    n -> type = TYPE_NUM;
+                    n -> value = 0;
+                    tree_delete(n -> left);
+                    tree_delete(n -> right);
+                    n -> left = NULL;
+                    n -> right = NULL;
+                    (*k)++;
+                }
+                else if(n -> left -> type == TYPE_NUM && n -> left -> value == 0)
+                {
+                    n -> type = TYPE_NUM;
+                    n -> value = 0;
+                    tree_delete(n -> left);
+                    tree_delete(n -> right);
+                    n -> left = NULL;
+                    n -> right = NULL;
+                    (*k)++;
+                }
+                else if(n -> right -> type == TYPE_NUM && n -> right -> value == 1)
+                {
+                    n -> type = n -> left -> type;
+                    n -> value = n -> left -> value;
+                    node_t * tmp = n -> left;
+                    n -> left = tmp -> left;
+                    n -> right = tmp -> right;
+                    free(tmp);
+                    (*k)++;
+                }
+                else if(n -> left -> type == TYPE_NUM && n -> left -> value == 1)
+                {
+                    n -> type = n -> right -> type;
+                    n -> value = n -> right -> value;
+                    node_t * tmp = n -> right;
+                    n -> left = tmp -> left;
+                    n -> right = tmp -> right;
+                    free(tmp);
+                    (*k)++;
+                }
+                break;
+            case OP_MINUS:
+                if(n -> left -> type == TYPE_NUM && n -> right -> type == TYPE_NUM)
+                {
+                    n -> type = TYPE_NUM;
+                    n -> value = (n -> left -> value) - (n -> right -> value);
+                    tree_delete(n -> left);
+                    tree_delete(n -> right);
+                    n -> left = NULL;
+                    n -> right = NULL;
+                    (*k)++;
+                }
+
+                else if(n -> right -> type == TYPE_NUM && n -> right -> value == 0)
+                {
+                    n -> value = OP_PLUS;
+                    (*k)++;
+                }
+                break;
+            case OP_DIV:
+
+                if(n -> right -> type == TYPE_NUM && n -> right -> value == 0)
+                {
+                    assert(!" error denominator is zero ");
+                }
+                else
+                {
+                    if(n -> left -> type == TYPE_NUM && n -> right -> type == TYPE_NUM)
+                    {
+                        n -> type = TYPE_NUM;
+                        n -> value = (n -> left -> value) / (n -> right -> value);
+                        tree_delete(n -> left);
+                        tree_delete(n -> right);
+                        n -> left = NULL;
+                        n -> right = NULL;
+                        (*k)++;
+                    }
+                    else if(n -> left -> type == TYPE_NUM && n -> left -> value == 0)
+                    {
+                        n -> type = TYPE_NUM;
+                        n -> value = 0;
+                        tree_delete(n -> left);
+                        tree_delete(n -> right);
+                        n -> left = NULL;
+                        n -> right = NULL;
+                        (*k)++;
+                    }
+                    else if(n -> right -> type == TYPE_NUM && n -> right -> value == 1)
+                    {
+                        n -> type = n -> left -> type;
+                        n -> value = n -> left -> value;
+                        node_t * tmp = n -> left;
+                        n -> left = tmp -> left;
+                        n -> right = tmp -> right;
+                        free(tmp);
+                        (*k)++;
+                    }
+                }
+                break;
+        }
+    }
+    if(n -> left != NULL)
+        tree_opt_rec(n -> left, k);
+    if(n -> right != NULL)
+        tree_opt_rec(n -> right, k);
+    return 0;
+}
+
+int tree_opt(node_t* n)
+{
+    int p;
+    p = 1;
+    while(p != 0)
+    {
+        p = 0;
+        tree_opt_rec(n, &p);
+    }
+    return 0;
 }
 
 int Tree_Print(node_t* n)

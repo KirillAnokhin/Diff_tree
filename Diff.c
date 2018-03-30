@@ -30,52 +30,53 @@ char* get_type_str(int type)
 int main()
 {
 
+
     // CREATE TREE 5x + sinx;
     /*
     node_t* tree_l_l = node_create(TYPE_NUM, 5, NULL, NULL);
-    node_t* tree_l_r = node_create(TYPE_VAR, 0, NULL, NULL);
-    node_t* tree_r_l = node_create(TYPE_VAR, 0, NULL, NULL);
+    node_t* tree_l_r = node_create(TYPE_VAR, 'x', NULL, NULL);
+    node_t* tree_r_l = node_create(TYPE_VAR, 'x', NULL, NULL);
     node_t* tree_l   = node_create(TYPE_OP, OP_MULT, tree_l_l, tree_l_r);
-   //node_t* tree_l   = node_create(TYPE_OP, OP_MULT, NULL, NULL);
     node_t* tree_r   = node_create(TYPE_OP, OP_SIN, tree_r_l, NULL);
-    //node_t* tree_r   = node_create(TYPE_OP, OP_SIN, NULL, NULL);
     node_t* tree     = node_create(TYPE_OP, OP_PLUS, tree_l, tree_r);
-    //node_t* tree     = node_create(TYPE_OP, OP_PLUS, NULL, NULL);
     node_t* d = diff(tree);
+    tree_opt(d);
     Tree_Print(d);
-    //node_t* tree_cop = node_copy(tree);
-    //Tree_Print(tree_cop);
-    ///get_op_str(tree_l -> value);
-    //printf("%s", (get_type_str(tree -> type)));
-   // diff(tree);
+
+    tree_delete(d);
+    tree_delete(tree);
     */
 
-    //  CREATE TREE 1/5x
-   // node_t* tree_r_l = node_create(TYPE_NUM, 5, NULL, NULL);
-   // node_t* tree_r_r = node_create(TYPE_VAR, 0, NULL, NULL);
-   /*
-    char x;
+
+
+    //  CREATE TREE 1/x
+    /*
     node_t* tree_l = node_create(TYPE_NUM, 1, NULL, NULL);
-    node_t* tree_r = node_create(TYPE_VAR, x, NULL, NULL);
+    node_t* tree_r = node_create(TYPE_VAR, 'x', NULL, NULL);
     node_t* tree   = _DIV(tree_l, tree_r);
     node_t* d = diff(tree);
+    tree_opt(d);
     Tree_Print(d);
+
+    tree_delete(d);
+    tree_delete(tree);
     */
-    //CREATE TREE COSx;
+
+
+    //CREATE TREE cos(x) + sh(x + 5) * chx;
     /*
-    node_t* tree_l = node_create(TYPE_VAR, 0, NULL, NULL);
-    node_t* tree = node_create(TYPE_OP, OP_COS, tree_l, NULL);
+    node_t* tree_r = _MULT(_SH(_PLUS(node_create(TYPE_VAR, 'x', NULL, NULL), node_create(TYPE_NUM, 5, NULL, NULL))), _SH(node_create(TYPE_VAR, 'x', NULL, NULL)));
+    node_t* tree_l = _COS(node_create(TYPE_VAR, 'x', NULL, NULL));
+    node_t* tree   = _PLUS(tree_l, tree_r);
     node_t* d = diff(tree);
+    tree_opt(d);
     Tree_Print(d);
+
+    tree_delete(d);
+    tree_delete(tree);
     */
-    //CREATE TREE shx
-    /*
-    node_t* tree_l = node_create(TYPE_VAR, 'x', NULL, NULL);
-    node_t* tree = node_create(TYPE_OP, OP_SH, tree_l, NULL);
-    node_t* d = diff(tree);
-    Tree_Print(d);
-    */
-    //CREATE TREE x^2
+
+    //CREATE TREE x^x
     /*
     node_t* tree_l = node_create(TYPE_VAR, 'x', NULL, NULL);
     node_t* tree_r = node_create(TYPE_VAR, 'x', NULL, NULL);
@@ -83,13 +84,75 @@ int main()
     node_t* tree = node_create(TYPE_OP, OP_POW, tree_l, tree_r);
 
     node_t* d = diff(tree);
-
+    tree_opt(d);
     Tree_Print(d);
+
+    tree_delete(d);
+    tree_delete(tree);
     */
+
+
     //CREATE TREE tg(x)
+    /*
     node_t* tree_l = node_create(TYPE_VAR, 'x', NULL, NULL);
     node_t* tree = node_create(TYPE_OP, OP_TAN, tree_l, NULL);
     node_t* d = diff(tree);
+    tree_opt(d);
     Tree_Print(d);
+
+    tree_delete(d);
+    tree_delete(tree);
+    */
+
+    //CREATE TREE 2^(ln(x + 6))
+    /*
+    node_t* tree_r = _LN(_PLUS(node_create(TYPE_VAR, 'x', NULL, NULL), node_create(TYPE_NUM, 6, NULL, NULL)));
+    node_t* tree   = _POW(node_create(TYPE_NUM, 2, NULL, NULL), tree_r);
+    node_t* d = diff(tree);
+    tree_opt(d);
+    Tree_Print(d);
+
+    tree_delete(d);
+    tree_delete(tree);
+    */
+
+    // CREATE TREE tg(x^2 + 8) / ln(sinx * cosx)
+    /*
+    node_t* numerator = _TAN(_PLUS(_POW(node_create(TYPE_VAR, 'x', NULL, NULL), node_create(TYPE_VAR, 'x', NULL, NULL)), node_create(TYPE_NUM, 8, NULL, NULL)));
+    node_t* denominator = _LN(_MULT(_SIN(node_create(TYPE_VAR, 'x', NULL, NULL)),_COS(node_create(TYPE_VAR, 'x', NULL, NULL))));
+    node_t* tree = _DIV(numerator, denominator);
+    node_t* d = diff(tree);
+    tree_opt(d);
+    Tree_Print(d);
+
+    tree_delete(d);
+    tree_delete(tree);
+    */
+
+    //create tree
+    node_t* sinus = _MULT(_SIN(node_create(TYPE_VAR, 'a', NULL, NULL)), _SIN(node_create(TYPE_VAR, 'a', NULL, NULL)));
+    node_t* denominator = _COS(_PLUS(sinus, _MULT(node_create(TYPE_NUM, 4, NULL, NULL), node_create(TYPE_VAR, 'x', NULL, NULL))));
+    node_t* log = _LN(_MINUS(_MULT(node_create(TYPE_VAR, 'x', NULL, NULL), node_create(TYPE_VAR, 'x', NULL, NULL)), node_create(TYPE_NUM, 4, NULL, NULL)));
+    node_t* power = _PLUS(_SIN(node_create(TYPE_VAR, 'x', NULL, NULL)), log);
+    node_t* numerator = _POW(node_create(TYPE_VAR, 'x', NULL, NULL), power);
+    node_t* tree = _DIV(numerator, denominator);
+
+
+    /*
+    node_t* sinus = _SIN(node_create(TYPE_VAR, 'a', NULL, NULL));
+    node_t* denominator = _COS(_PLUS(node_copy(sinus), _MULT(node_create(TYPE_NUM, 4, NULL, NULL), node_create(TYPE_VAR, 'x', NULL, NULL)) ));
+    node_t* log = _LN(_MINUS(_MULT(node_create(TYPE_VAR, 'x', NULL, NULL), node_create(TYPE_VAR, 'x', NULL, NULL)), node_create(TYPE_NUM, 4, NULL, NULL)));
+    node_t* numerator = _POW(node_create(TYPE_VAR, 'x', NULL, NULL), node_copy(log));
+    node_t* tree = _DIV(numerator, denominator);
+    */
+
+   // node_t* tree = _PLUS(_SIN(node_create(TYPE_VAR, 'x', NULL, NULL)), _SIN(node_create(TYPE_VAR, 'a', NULL, NULL)));
+    node_t* d = diff(tree);
+    tree_opt(d);
+    Tree_Print(d);
+    //Tree_Print(tree);
+
+    tree_delete(tree);
+    tree_delete(tree);
     return 0;
 }

@@ -20,8 +20,10 @@ int TreePrintRec(node_t* n, FILE* output);
 node_t* node_create(int type, float value, node_t* left, node_t* right);
 node_t* node_copy(node_t* n);
 node_t* diff(const node_t* n);
-node_t* mult_diff(node_t* n);
-node_t* div_diff(node_t* n);
+node_t* mult_diff(const node_t* n);
+node_t* div_diff(const node_t* n);
 node_t* pow_diff(node_t* n);
-
+int tree_delete(node_t* n);
+int tree_opt_rec(node_t* n, int* k);
+int tree_opt(node_t* n);
 #endif
