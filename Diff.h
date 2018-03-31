@@ -15,6 +15,8 @@
 #define _SH(node_pointer) node_create(TYPE_OP, OP_SH, node_pointer, NULL)
 #define _CH(node_pointer) node_create(TYPE_OP, OP_CH, node_pointer, NULL)
 #define _TAN(node_pointer) node_create(TYPE_OP, OP_TAN, node_pointer, NULL)
+#define _NUMBER(value) node_create(TYPE_NUM, value, NULL, NULL)
+#define _VAR(value) node_create(TYPE_VAR, value, NULL, NULL)
 
 enum ALG_CODES  //OP_PLUS = 1 etc
 {

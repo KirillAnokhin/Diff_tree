@@ -2,6 +2,7 @@
 #include "diff_tree.h"
 #include "Diff.h"
 
+//char* get_op_str(float op);
 char* get_op_str(float op)
 {
     #define OPERATOR(name, symb) case OP_##name: return #symb;
@@ -129,7 +130,27 @@ int main()
     tree_delete(tree);
     */
 
-    //create tree
+    //create tree MAIN TEST
+    /*
+    node_t* sinus = _MULT(_SIN(node_create(TYPE_VAR, 'a', NULL, NULL)), _SIN(node_create(TYPE_VAR, 'a', NULL, NULL)));
+    node_t* denominator = _COS(_PLUS(sinus, _MULT(node_create(TYPE_NUM, 4, NULL, NULL), node_create(TYPE_VAR, 'x', NULL, NULL))));
+    node_t* log = _LN(_MINUS(_MULT(node_create(TYPE_VAR, 'x', NULL, NULL), node_create(TYPE_VAR, 'x', NULL, NULL)), node_create(TYPE_NUM, 4, NULL, NULL)));
+    node_t* power = _PLUS(_SIN(node_create(TYPE_VAR, 'x', NULL, NULL)), log);
+    node_t* numerator = _POW(node_create(TYPE_VAR, 'x', NULL, NULL), power);
+    node_t* tree = _DIV(numerator, denominator);
+
+    node_t* d = diff(tree);
+    tree_opt(d);
+    Tree_Print(d);
+
+    tree_delete(tree);
+    tree_delete(tree);
+    */
+
+    FILE* result;
+    result = fopen("res.tex", "w");
+    Tex_init(result);
+
     node_t* sinus = _MULT(_SIN(node_create(TYPE_VAR, 'a', NULL, NULL)), _SIN(node_create(TYPE_VAR, 'a', NULL, NULL)));
     node_t* denominator = _COS(_PLUS(sinus, _MULT(node_create(TYPE_NUM, 4, NULL, NULL), node_create(TYPE_VAR, 'x', NULL, NULL))));
     node_t* log = _LN(_MINUS(_MULT(node_create(TYPE_VAR, 'x', NULL, NULL), node_create(TYPE_VAR, 'x', NULL, NULL)), node_create(TYPE_NUM, 4, NULL, NULL)));
@@ -138,21 +159,14 @@ int main()
     node_t* tree = _DIV(numerator, denominator);
 
 
-    /*
-    node_t* sinus = _SIN(node_create(TYPE_VAR, 'a', NULL, NULL));
-    node_t* denominator = _COS(_PLUS(node_copy(sinus), _MULT(node_create(TYPE_NUM, 4, NULL, NULL), node_create(TYPE_VAR, 'x', NULL, NULL)) ));
-    node_t* log = _LN(_MINUS(_MULT(node_create(TYPE_VAR, 'x', NULL, NULL), node_create(TYPE_VAR, 'x', NULL, NULL)), node_create(TYPE_NUM, 4, NULL, NULL)));
-    node_t* numerator = _POW(node_create(TYPE_VAR, 'x', NULL, NULL), node_copy(log));
-    node_t* tree = _DIV(numerator, denominator);
-    */
-
-   // node_t* tree = _PLUS(_SIN(node_create(TYPE_VAR, 'x', NULL, NULL)), _SIN(node_create(TYPE_VAR, 'a', NULL, NULL)));
     node_t* d = diff(tree);
     tree_opt(d);
-    Tree_Print(d);
-    //Tree_Print(tree);
+    TreePrintTex(d, result);
+    Tex_end(result);
+    fclose(result);
+    Get_pdf();
+    tree_delete(tree);
+    tree_delete(d);
 
-    tree_delete(tree);
-    tree_delete(tree);
     return 0;
 }

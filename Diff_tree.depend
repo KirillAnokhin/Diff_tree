@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1522343669 source:/home/user/prog/Diff_tree/Diff.c
+1522528502 source:/home/user/prog/Diff_tree/Diff.c
 	<assert.h>
 	"diff_tree.h"
 	"Diff.h"
@@ -12,11 +12,11 @@
 	<assert.h>
 	"diff_tree.h"
 
-1522010182 /home/user/prog/Diff_tree/diff_tree.h
+1522528603 /home/user/prog/Diff_tree/diff_tree.h
 	<stdio.h>
 	<stdlib.h>
 
-1522342176 source:/home/user/prog/Diff_tree/tree.c
+1522528093 source:/home/user/prog/Diff_tree/tree.c
 	<stdio.h>
 	<stdlib.h>
 	<assert.h>
@@ -25,7 +25,7 @@
 
 1521923769 /home/user/prog/Diff_tree/alg.h
 
-1521923749 /home/user/prog/Diff_tree/Diff.h
+1522503292 /home/user/prog/Diff_tree/Diff.h
 	"alg.h"
 	"types.h"
 

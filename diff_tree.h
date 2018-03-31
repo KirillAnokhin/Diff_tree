@@ -14,9 +14,6 @@ struct node_t
 };
 int Tree_Print(node_t* n);
 int TreePrintRec(node_t* n, FILE* output);
-
-//node_t* read_tree(char **cur);
-
 node_t* node_create(int type, float value, node_t* left, node_t* right);
 node_t* node_copy(node_t* n);
 node_t* diff(const node_t* n);
@@ -26,4 +23,9 @@ node_t* pow_diff(node_t* n);
 int tree_delete(node_t* n);
 int tree_opt_rec(node_t* n, int* k);
 int tree_opt(node_t* n);
+int TreePrintTex(node_t* n, FILE* out);
+int Tex_rec(node_t* n, FILE* out);
+int Tex_init(FILE* out);
+int Tex_end(FILE* out);
+int Get_pdf();
 #endif

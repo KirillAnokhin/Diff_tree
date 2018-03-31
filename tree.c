@@ -57,13 +57,13 @@ node_t* diff(const node_t* n)
                     return div_diff(n);
 
                 case OP_SIN:
-                    if(n -> left -> type == TYPE_NUM || n -> left -> type == TYPE_VAR && n -> left -> value != 'x')
+                    if(n -> left -> type == TYPE_NUM || (n -> left -> type == TYPE_VAR && n -> left -> value != 'x'))
                         return _ZERO;
                     else
                         return _MULT(diff(n -> left), _COS(n -> left));
 
                 case OP_COS:
-                    if(n -> left -> type == TYPE_NUM || n -> left -> type == TYPE_VAR && n -> left -> value != 'x')
+                    if(n -> left -> type == TYPE_NUM || (n -> left -> type == TYPE_VAR && n -> left -> value != 'x'))
                         return _ZERO;
                     else
                         return _MULT(node_create(TYPE_NUM, -1, NULL, NULL), _MULT(diff(n->left), _SIN(n -> left)));
@@ -97,25 +97,25 @@ node_t* diff(const node_t* n)
                 }
 
                 case OP_LN:
-                    if(n -> left -> type == TYPE_NUM || n -> left -> type == TYPE_VAR && n -> left -> value != 'x')
+                    if(n -> left -> type == TYPE_NUM || (n -> left -> type == TYPE_VAR && n -> left -> value != 'x'))
                         return _ZERO;
                     else
                         return _DIV(diff(n -> left), node_copy(n -> left));
 
                 case OP_SH:
-                    if(n -> left -> type == TYPE_NUM || n -> left -> type == TYPE_VAR && n -> left -> value != 'x')
+                    if(n -> left -> type == TYPE_NUM || (n -> left -> type == TYPE_VAR && n -> left -> value != 'x'))
                         return _ZERO;
                     else
                         return _MULT(diff(n -> left), _CH(n -> left));
 
                 case OP_CH:
-                    if(n -> left -> type == TYPE_NUM || n -> left -> type == TYPE_VAR && n -> left -> value != 'x')
+                    if(n -> left -> type == TYPE_NUM || (n -> left -> type == TYPE_VAR && n -> left -> value != 'x'))
                         return _ZERO;
                     else
                         return _MULT(diff(n -> left), _SH(n -> left));
 
                 case OP_TAN:
-                    if(n -> left -> type == TYPE_NUM || n -> left -> type == TYPE_VAR && n -> left -> value != 'x')
+                    if(n -> left -> type == TYPE_NUM || (n -> left -> type == TYPE_VAR && n -> left -> value != 'x'))
                         return _ZERO;
                     else
                         return _DIV(diff(n -> left), _MULT(node_copy(_COS(n -> left)), node_copy(_COS(n -> left))));
@@ -366,4 +366,135 @@ int TreePrintRec(node_t* n, FILE* output)
     return 0;
 }
 
+int TreePrintTex(node_t* n, FILE* out)
+{
+    fprintf(out, " $$");
+    Tex_rec(n, out);
+    fprintf(out, "$$\n");
+    return 0;
+}
 
+int Tex_rec(node_t* n, FILE* out)
+{
+    if(n -> left == NULL && n -> right == NULL)
+        switch(n -> type)
+        {
+            case TYPE_NUM:
+                fprintf(out, "%.2f", n->value);
+                break;
+
+            case TYPE_VAR:
+                fprintf(out, "%c", (int)n->value);
+                break;
+        }
+    else
+    {
+        if(n -> value == OP_PLUS)
+        {
+            Tex_rec(n -> left, out);
+            fprintf(out, "+");
+            Tex_rec(n -> right, out);
+        }
+
+        if(n -> value == OP_MINUS)
+        {
+            Tex_rec(n -> left, out);
+            fprintf(out, "-");
+            Tex_rec(n -> right, out);
+        }
+
+        if(n -> value == OP_MULT)
+        {
+            Tex_rec(n -> left, out);
+            fprintf(out, " \\cdot ");
+            Tex_rec(n -> right, out);
+        }
+
+        if(n -> value == OP_DIV)
+        {
+            fprintf(out, "\\frac{");
+            Tex_rec(n -> left, out);
+            fprintf(out, "}{");
+            Tex_rec(n -> right, out);
+            fprintf(out, "}");
+        }
+
+        if(n -> value == OP_POW)
+        {
+            Tex_rec(n -> left, out);
+            fprintf(out, "^ {");
+            Tex_rec(n -> right, out);
+            fprintf(out, "}");
+        }
+
+        if(n -> value == OP_SIN)
+        {
+            fprintf(out, "sin(");
+            Tex_rec(n -> left, out);
+            fprintf(out, ")");
+        }
+
+        if(n -> value == OP_COS)
+        {
+            fprintf(out, "cos(");
+            Tex_rec(n -> left, out);
+            fprintf(out, ")");
+        }
+
+        if(n -> value == OP_LN)
+        {
+            fprintf(out, "ln(");
+            Tex_rec(n -> left, out);
+            fprintf(out, ")");
+        }
+
+        if(n -> value == OP_SH)
+        {
+            fprintf(out, "sh(");
+            Tex_rec(n -> left, out);
+            fprintf(out, ")");
+        }
+
+        if(n -> value == OP_CH)
+        {
+            fprintf(out, "ch(");
+            Tex_rec(n -> left, out);
+            fprintf(out, ")");
+        }
+
+        if(n -> value == OP_TAN)
+        {
+            fprintf(out, "tg(");
+            Tex_rec(n -> left, out);
+            fprintf(out, ")");
+        }
+    }
+    return 0;
+}
+
+int Tex_init(FILE* out)
+{
+    assert(out);
+    fprintf(out, "\\documentclass[12pt]{article}\n\
+    \\usepackage{ucs}\n\
+    \\usepackage[utf8x]{inputenc}\n\
+    \\usepackage[english,russian]{babel}\n\
+    \\pagestyle{empty}\n\
+    \\usepackage{amsmath}\n\
+    \n\\begin{document}\n");
+    return 0;
+}
+
+int Tex_end(FILE* out)
+{
+    assert(out);
+    fprintf(out, "\\end{document}\n");
+    return 0;
+}
+
+int Get_pdf()
+{
+    system("pdflatex res.tex");
+    system("xdg-open res.pdf");
+    return 0;
+}
