@@ -30,7 +30,7 @@ node_t* node_copy(node_t* n)
 
 
 
-node_t* diff(const node_t* n)
+node_t* diff(const node_t* n, FILE* out)
 {
     assert(n);
     switch(n -> type)
@@ -45,28 +45,28 @@ node_t* diff(const node_t* n)
             switch((int)(n -> value))
             {
                 case OP_PLUS:
-                    return _PLUS(diff(n -> left), diff(n -> right));
+                    return _PLUS(diff(n -> left, out), diff(n -> right, out));
 
                 case OP_MINUS:
-                    return _MINUS(diff(n -> left), diff(n -> right));
+                    return _MINUS(diff(n -> left, out), diff(n -> right, out));
 
                 case OP_MULT:
-                    return mult_diff(n);
+                    return mult_diff(n, out);
 
                 case OP_DIV:
-                    return div_diff(n);
+                    return div_diff(n, out);
 
                 case OP_SIN:
                     if(n -> left -> type == TYPE_NUM || (n -> left -> type == TYPE_VAR && n -> left -> value != 'x'))
                         return _ZERO;
                     else
-                        return _MULT(diff(n -> left), _COS(n -> left));
+                        return _MULT(diff(n -> left, out), _COS(n -> left));
 
                 case OP_COS:
                     if(n -> left -> type == TYPE_NUM || (n -> left -> type == TYPE_VAR && n -> left -> value != 'x'))
                         return _ZERO;
                     else
-                        return _MULT(node_create(TYPE_NUM, -1, NULL, NULL), _MULT(diff(n->left), _SIN(n -> left)));
+                        return _MULT(node_create(TYPE_NUM, -1, NULL, NULL), _MULT(diff(n->left, out), _SIN(n -> left)));
 
                 case OP_POW:
                 {
@@ -74,7 +74,7 @@ node_t* diff(const node_t* n)
                     {
                         node_t* a = node_create(TYPE_NUM, n -> right -> value, NULL, NULL);
                         node_t* b = node_create(TYPE_NUM, n -> right -> value - 1, NULL, NULL);
-                        node_t* f_ = diff(n -> left);
+                        node_t* f_ = diff(n -> left, out);
                         node_t* f = node_copy(n -> left);
                         return _MULT(_MULT(a, _POW(f, b)), f_);
                     }
@@ -82,7 +82,7 @@ node_t* diff(const node_t* n)
                     {
                         node_t* a = node_create(TYPE_NUM, n -> left -> value, NULL, NULL);
                         node_t* ln_a = _LN(a);
-                        node_t* f_ = diff(n -> right);
+                        node_t* f_ = diff(n -> right, out);
                         node_t* f = node_copy(n -> right);
                         return _MULT(_MULT(ln_a, _POW(node_copy(a), f)), f_);
                     }
@@ -92,7 +92,7 @@ node_t* diff(const node_t* n)
                         node_t* g = node_copy(n -> right);
                         node_t* e = node_create(TYPE_VAR, 'e', NULL, NULL);
                         node_t* ln_f = _LN(node_copy(f));
-                        return _MULT(_POW(e, _MULT(g, ln_f)), mult_diff(_MULT(node_copy(g), node_copy(ln_f))));
+                        return _MULT(_POW(e, _MULT(g, ln_f)), mult_diff(_MULT(node_copy(g), node_copy(ln_f)), out));
                     }
                 }
 
@@ -100,25 +100,25 @@ node_t* diff(const node_t* n)
                     if(n -> left -> type == TYPE_NUM || (n -> left -> type == TYPE_VAR && n -> left -> value != 'x'))
                         return _ZERO;
                     else
-                        return _DIV(diff(n -> left), node_copy(n -> left));
+                        return _DIV(diff(n -> left, out), node_copy(n -> left));
 
                 case OP_SH:
                     if(n -> left -> type == TYPE_NUM || (n -> left -> type == TYPE_VAR && n -> left -> value != 'x'))
                         return _ZERO;
                     else
-                        return _MULT(diff(n -> left), _CH(n -> left));
+                        return _MULT(diff(n -> left, out), _CH(n -> left));
 
                 case OP_CH:
                     if(n -> left -> type == TYPE_NUM || (n -> left -> type == TYPE_VAR && n -> left -> value != 'x'))
                         return _ZERO;
                     else
-                        return _MULT(diff(n -> left), _SH(n -> left));
+                        return _MULT(diff(n -> left, out), _SH(n -> left));
 
                 case OP_TAN:
                     if(n -> left -> type == TYPE_NUM || (n -> left -> type == TYPE_VAR && n -> left -> value != 'x'))
                         return _ZERO;
                     else
-                        return _DIV(diff(n -> left), _MULT(node_copy(_COS(n -> left)), node_copy(_COS(n -> left))));
+                        return _DIV(diff(n -> left, out), _MULT(node_copy(_COS(n -> left)), node_copy(_COS(n -> left))));
             }
 
     }
@@ -126,20 +126,20 @@ node_t* diff(const node_t* n)
     return NULL;
 }
 
-node_t* mult_diff(const node_t* n)
+node_t* mult_diff(const node_t* n, FILE* out)
 {
-        node_t* u_ = diff(n -> left);
+        node_t* u_ = diff(n -> left, out);
         node_t* v  = node_copy(n -> right);
-        node_t* v_ = diff(n -> right);
+        node_t* v_ = diff(n -> right, out);
         node_t* u  = node_copy(n -> left);
         return _PLUS(_MULT(u_, v), _MULT(u, v_));
 }
 
-node_t* div_diff(const node_t* n)
+node_t* div_diff(const node_t* n, FILE* out)
 {
-    node_t* u_ = diff(n -> left);
+    node_t* u_ = diff(n -> left, out);
     node_t* v  = node_copy(n -> right);
-    node_t* v_ = diff(n -> right);
+    node_t* v_ = diff(n -> right, out);
     node_t* u  = node_copy(n -> left);
     node_t* znam1 = node_copy(v);
     node_t* znam2 = node_copy(v);
@@ -391,16 +391,20 @@ int Tex_rec(node_t* n, FILE* out)
     {
         if(n -> value == OP_PLUS)
         {
+            fprintf(out, "(");
             Tex_rec(n -> left, out);
             fprintf(out, "+");
             Tex_rec(n -> right, out);
+            fprintf(out, ")");
         }
 
         if(n -> value == OP_MINUS)
         {
+            fprintf(out, "(");
             Tex_rec(n -> left, out);
             fprintf(out, "-");
             Tex_rec(n -> right, out);
+            fprintf(out, ")");
         }
 
         if(n -> value == OP_MULT)
@@ -418,7 +422,6 @@ int Tex_rec(node_t* n, FILE* out)
             Tex_rec(n -> right, out);
             fprintf(out, "}");
         }
-
         if(n -> value == OP_POW)
         {
             Tex_rec(n -> left, out);
